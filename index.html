@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pinterest Farm — Free Spot Drawing 🦋</title>
+<style>
+  :root{
+    --red:#e00027; --red-deep:#8f0f24; --wine:#6d0218; --burgundy:#3d000d;
+    --pearl:#fff8f6; --pearl2:#ffeef1; --pink:#ff5b74; --pinksoft:#ffd9de; --gold:#f6c453;
+    --ink:#3d0a12; --line:#f3b7c2;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1100px 600px at 15% -5%, rgba(255,91,116,.5), transparent 60%),
+      radial-gradient(900px 700px at 90% 10%, rgba(246,196,83,.22), transparent 55%),
+      linear-gradient(165deg,#57020f 0%, var(--burgundy) 45%, #2b000a 100%);
+    min-height:100vh; padding:22px 16px 46px;
+  }
+  .wrap{max-width:1180px;margin:0 auto}
+  header{text-align:center;color:#fff;margin-bottom:8px}
+  header .fly{font-size:30px;letter-spacing:14px;opacity:.9}
+  h1{
+    margin:4px 0 2px;font-size:clamp(1.7rem,5.4vw,3rem);font-weight:900;letter-spacing:.5px;color:#fff;
+    text-shadow:0 0 18px rgba(255,80,110,.75),0 4px 14px rgba(0,0,0,.5);white-space:nowrap;
+  }
+  header p{margin:4px auto 0;max-width:640px;color:#ffd9de;font-size:clamp(.98rem,2.6vw,1.12rem);line-height:1.5}
+  .grid{display:grid;grid-template-columns:380px 1fr;gap:20px;margin-top:22px;align-items:start}
+  @media (max-width:920px){.grid{grid-template-columns:1fr}}
+  .card{
+    background:linear-gradient(180deg,var(--pearl),var(--pearl2));
+    border:2px solid var(--line);border-radius:22px;padding:20px;
+    box-shadow:0 18px 44px rgba(0,0,0,.4), inset 0 1px 0 #fff;
+  }
+  .card h2{margin:0 0 4px;color:var(--red-deep);font-size:1.25rem}
+  .card h2::after{content:"";display:block;width:64px;height:4px;border-radius:99px;margin-top:7px;
+    background:linear-gradient(90deg,var(--red),var(--pink),transparent)}
+  .hint{font-size:.92rem;color:#7a4a53;line-height:1.5;margin:6px 0 10px}
+  textarea{
+    width:100%;min-height:96px;resize:vertical;border:2px solid var(--line);border-radius:14px;
+    padding:12px 14px;font:inherit;font-size:1rem;background:#fff;color:var(--ink);
+  }
+  textarea:focus{outline:3px solid rgba(224,0,39,.3);border-color:var(--pink)}
+  .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+  button{font:inherit;cursor:pointer}
+  .btn{
+    border:none;border-radius:999px;padding:12px 20px;font-weight:800;font-size:.98rem;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .btn:active{transform:translateY(2px) scale(.98)}
+  .btn-red{background:linear-gradient(180deg,var(--pink),var(--red));color:#fff;
+    box-shadow:0 0 0 2px #ffd9de inset,0 8px 22px rgba(224,0,39,.5),0 0 24px rgba(255,80,110,.35)}
+  .btn-red:hover{transform:translateY(-2px)}
+  .btn-pearl{background:linear-gradient(180deg,#ffffff,#ffe9ec);color:var(--red-deep);
+    box-shadow:0 0 0 2px var(--line) inset,0 6px 16px rgba(80,0,16,.25)}
+  .btn-ghost{background:transparent;color:#8a5a63;box-shadow:0 0 0 2px #e8cdd2 inset}
+  .count{font-weight:900;color:var(--red-deep);font-size:1.05rem;margin:16px 0 8px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;min-height:10px}
+  .chip{
+    display:inline-flex;align-items:center;gap:7px;background:#fff;border:2px solid var(--pinksoft);
+    border-radius:999px;padding:6px 8px 6px 14px;font-weight:700;font-size:.95rem;color:var(--wine);
+    box-shadow:0 3px 8px rgba(80,0,16,.12);
+  }
+  .chip button{
+    border:none;width:22px;height:22px;border-radius:50%;background:var(--red);color:#fff;
+    font-size:14px;line-height:1;display:grid;place-items:center;padding:0;
+  }
+  .wheel-card{text-align:center}
+  .wheel-wrap{position:relative;width:min(560px,92vw);margin:6px auto 0;aspect-ratio:1/1}
+  canvas#wheel{width:100%;height:100%;display:block;filter:drop-shadow(0 22px 34px rgba(0,0,0,.5))}
+  .pointer{
+    position:absolute;left:50%;top:-8px;transform:translateX(-50%);z-index:5;
+    width:0;height:0;border-left:19px solid transparent;border-right:19px solid transparent;
+    border-top:32px solid var(--gold);filter:drop-shadow(0 3px 4px rgba(0,0,0,.45));
+  }
+  .hub{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:4;
+    width:21%;height:21%;border-radius:50%;border:4px solid #fff;
+    background:radial-gradient(circle at 35% 30%, #ff8296, var(--red) 62%, var(--red-deep));
+    color:#fff;display:grid;place-items:center;text-align:center;
+    font-weight:900;font-size:clamp(.8rem,2.6vw,1.05rem);letter-spacing:1px;line-height:1.15;
+    box-shadow:0 8px 22px rgba(0,0,0,.4), inset 0 2px 6px rgba(255,255,255,.5);cursor:pointer;user-select:none;
+  }
+  .hub[disabled]{opacity:.55;cursor:not-allowed}
+  .spin-big{
+    margin:20px auto 2px;display:block;padding:17px 54px;font-size:1.3rem;letter-spacing:2px;
+  }
+  .spin-big[disabled]{opacity:.5;cursor:not-allowed;transform:none}
+  .spin-hint{min-height:1.4em;color:#7a4a53;font-weight:700;margin-top:8px}
+  .sound-row{display:flex;align-items:center;gap:8px;justify-content:center;margin-top:6px;color:#7a4a53;font-weight:700;font-size:.92rem}
+  .winners{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+  @media (max-width:560px){.winners{grid-template-columns:1fr}}
+  .spot{
+    border-radius:18px;padding:16px;text-align:center;border:2px dashed var(--line);background:#fff;
+  }
+  .spot .lbl{font-size:.8rem;font-weight:900;letter-spacing:.14em;color:#b06a76;text-transform:uppercase}
+  .spot .nm{font-size:1.5rem;font-weight:900;color:var(--red-deep);margin-top:4px;min-height:1.5em}
+  .spot.filled{border:2px solid var(--gold);background:linear-gradient(180deg,#fff8e6,#ffedb8);
+    box-shadow:0 0 26px rgba(246,196,83,.45)}
+  .both{text-align:center;font-weight:900;color:var(--red-deep);font-size:1.15rem;margin-top:12px;display:none}
+  /* winner overlay */
+  .overlay{
+    position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:18px;
+    background:rgba(30,0,8,.78);backdrop-filter:blur(4px);
+  }
+  .overlay.show{display:flex}
+  .win-card{
+    position:relative;background:linear-gradient(180deg,#fffdf5,#ffeef1);border:3px solid var(--gold);
+    border-radius:26px;max-width:560px;width:100%;padding:34px 26px 26px;text-align:center;
+    box-shadow:0 0 70px rgba(246,196,83,.55),0 30px 70px rgba(0,0,0,.6);overflow:hidden;
+  }
+  .win-card .spot-lbl{font-size:clamp(1rem,3.4vw,1.3rem);font-weight:900;letter-spacing:.1em;color:var(--red)}
+  .win-card .win-name{
+    font-size:clamp(2.1rem,8vw,3.6rem);font-weight:900;color:var(--red-deep);line-height:1.1;margin:10px 0 6px;
+    text-shadow:0 2px 0 #ffd9de;word-break:break-word;
+  }
+  .win-card p{color:#7a4a53;font-weight:700;margin:4px 0 0}
+  .confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .confetti i{position:absolute;top:-14px;border-radius:3px;opacity:0}
+  @keyframes fall{0%{transform:translateY(-16px) rotate(0);opacity:1}100%{transform:translateY(560px) rotate(620deg);opacity:0}}
+  footer{text-align:center;color:#e8a7b2;margin-top:26px;font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="fly">🦋</div>
+    <h1>PINTEREST FARM</h1>
+    <p><strong>Free Spot Drawing 🦋</strong> — comment <strong>FARM</strong> on the post, get your name on the wheel, and we spin for <strong>2 free spots</strong> in the Pinterest Farm class, live!</p>
+  </header>
+
+  <div class="grid">
+    <!-- ===== Names panel ===== -->
+    <div class="card">
+      <h2>Names in the Drawing</h2>
+      <p class="hint">Type or paste names — <strong>one per line</strong> — then tap Add Names. Repeats are removed automatically. Names stay saved on this device, even if the page refreshes mid-live.</p>
+      <textarea id="nameInput" placeholder="Paste the FARM commenters here, one name per line…"></textarea>
+      <div class="row">
+        <button class="btn btn-red" id="addBtn" type="button">Add Names</button>
+        <button class="btn btn-pearl" id="loadBtn" type="button">Load Names (replace all)</button>
+      </div>
+      <div class="count" id="countLabel">0 names in the drawing</div>
+      <div class="chips" id="chipBox"></div>
+      <div class="row" style="margin-top:18px">
+        <button class="btn btn-pearl" id="resetBtn" type="button">Reset Drawing</button>
+        <button class="btn btn-ghost" id="clearBtn" type="button">Clear All</button>
+      </div>
+      <p class="hint" style="margin-top:12px">Reset Drawing clears the two winner spots and puts winners' names back on the wheel. Clear All wipes names and winners.</p>
+    </div>
+
+    <!-- ===== Wheel panel ===== -->
+    <div class="card wheel-card">
+      <h2 style="text-align:left">The Wheel</h2>
+      <div class="wheel-wrap">
+        <div class="pointer"></div>
+        <canvas id="wheel" width="640" height="640"></canvas>
+        <div class="hub" id="hubBtn" role="button" aria-label="Spin the wheel">SPIN<br>🦋</div>
+      </div>
+      <button class="btn btn-red spin-big" id="spinBtn" type="button">SPIN 🦋</button>
+      <div class="spin-hint" id="spinHint">Add at least one name to spin.</div>
+      <label class="sound-row"><input type="checkbox" id="soundChk" checked> 🔊 Tick sound</label>
+
+      <div class="winners">
+        <div class="spot" id="spot1"><div class="lbl">🎉 Spot #1 Winner</div><div class="nm">—</div></div>
+        <div class="spot" id="spot2"><div class="lbl">🎉 Spot #2 Winner</div><div class="nm">—</div></div>
+      </div>
+      <div class="both" id="bothFilled">🎉 Both spots filled! 🎉 Extra spins are just for fun now.</div>
+    </div>
+  </div>
+
+  <footer>Where Pins Turn Into Sales 🦋 · Pinterest Farm — Free Spot Drawing</footer>
+</div>
+
+<!-- ===== Winner overlay ===== -->
+<div class="overlay" id="overlay" role="dialog" aria-modal="true">
+  <div class="win-card">
+    <div class="confetti" id="confetti"></div>
+    <div class="spot-lbl" id="winSpotLabel">🎉 SPOT #1 WINNER 🎉</div>
+    <div class="win-name" id="winName">Name</div>
+    <p>You just won a FREE spot in the Pinterest Farm class! 🦋</p>
+    <div class="row" style="justify-content:center;margin-top:20px">
+      <button class="btn btn-red" id="confirmBtn" type="button">Confirm Winner ✅</button>
+      <button class="btn btn-pearl" id="againBtn" type="button">Spin Again (no winner)</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var LS_KEY = "pinterestFarmWheelV1";
+var PALETTE = [
+  {fill:"#e00027", text:"#ffffff"},
+  {fill:"#fff1f3", text:"#8f0f24"},
+  {fill:"#ff5b74", text:"#ffffff"},
+  {fill:"#ffd9a0", text:"#7a3a00"},
+  {fill:"#b0001c", text:"#ffffff"},
+  {fill:"#ffe3e8", text:"#8f0f24"},
+  {fill:"#f6c453", text:"#5c3a00"},
+  {fill:"#ff8fa3", text:"#6d0218"}
+];
+
+var state = { names: [], winners: [] };
+try{
+  var raw = localStorage.getItem(LS_KEY);
+  if(raw){ var p = JSON.parse(raw); if(p && Array.isArray(p.names)) state.names = p.names; if(p && Array.isArray(p.winners)) state.winners = p.winners.slice(0,2); }
+}catch(e){}
+
+var canvas = document.getElementById("wheel");
+var ctx = canvas.getContext("2d");
+var chipBox = document.getElementById("chipBox");
+var countLabel = document.getElementById("countLabel");
+var nameInput = document.getElementById("nameInput");
+var spinBtn = document.getElementById("spinBtn");
+var hubBtn = document.getElementById("hubBtn");
+var spinHint = document.getElementById("spinHint");
+var overlay = document.getElementById("overlay");
+var winName = document.getElementById("winName");
+var winSpotLabel = document.getElementById("winSpotLabel");
+var soundChk = document.getElementById("soundChk");
+
+var rotation = 0;           // degrees, accumulates
+var spinning = false;
+var pendingWinner = null;   // name awaiting confirm
+var audioCtx = null;
+var lastTickIdx = -1;
+
+function save(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({names: state.names, winners: state.winners})); }catch(e){}
+}
+function norm(s){ return (s||"").trim().replace(/\s+/g," "); }
+function hasName(n){
+  var low = n.toLowerCase();
+  for(var i=0;i<state.names.length;i++){ if(state.names[i].toLowerCase() === low) return true; }
+  for(var j=0;j<state.winners.length;j++){ if(state.winners[j].toLowerCase() === low) return true; }
+  return false;
+}
+function parseLines(){
+  return nameInput.value.split(/\r?\n/).map(norm).filter(function(s){ return s.length>0; });
+}
+
+/* ---------- rendering ---------- */
+function drawWheel(){
+  var n = state.names.length;
+  var W = canvas.width, C = W/2, R = C - 8;
+  ctx.clearRect(0,0,W,W);
+  // outer rim
+  ctx.beginPath(); ctx.arc(C,C,R+4,0,Math.PI*2);
+  ctx.fillStyle = "#8f0f24"; ctx.fill();
+  ctx.lineWidth = 3; ctx.strokeStyle = "#f6c453"; ctx.stroke();
+  if(n === 0){
+    for(var k=0;k<8;k++){
+      var a0 = (rotation + k*45 - 90) * Math.PI/180, a1 = (rotation + (k+1)*45 - 90) * Math.PI/180;
+      ctx.beginPath(); ctx.moveTo(C,C); ctx.arc(C,C,R,a0,a1); ctx.closePath();
+      ctx.fillStyle = PALETTE[k % PALETTE.length].fill; ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = "rgba(255,255,255,.65)"; ctx.stroke();
+    }
+    ctx.fillStyle = "#8f0f24";
+    ctx.font = "900 30px 'Segoe UI', sans-serif";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText("ADD NAMES", C, C - R*0.52);
+    ctx.fillText("TO START", C, C + R*0.52);
+    return;
+  }
+  var seg = 360 / n;
+  var fontSize = Math.max(12, Math.min(22, Math.floor(420 / Math.max(n,6))));
+  for(var i=0;i<n;i++){
+    var pal = PALETTE[i % PALETTE.length];
+    var s0 = (rotation + i*seg - 90) * Math.PI/180;
+    var s1 = (rotation + (i+1)*seg - 90) * Math.PI/180;
+    ctx.beginPath(); ctx.moveTo(C,C); ctx.arc(C,C,R,s0,s1); ctx.closePath();
+    ctx.fillStyle = pal.fill; ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = "rgba(255,255,255,.7)"; ctx.stroke();
+    // label
+    ctx.save();
+    ctx.translate(C,C);
+    ctx.rotate((rotation + (i+0.5)*seg - 90) * Math.PI/180);
+    ctx.textAlign = "right"; ctx.textBaseline = "middle";
+    ctx.fillStyle = pal.text;
+    ctx.font = "800 " + fontSize + "px 'Segoe UI', sans-serif";
+    var label = state.names[i];
+    var maxW = R * 0.62;
+    while(ctx.measureText(label).width > maxW && label.length > 3){ label = label.slice(0,-2); }
+    if(label !== state.names[i]) label = label + "…";
+    ctx.fillText(label, R - 14, 0);
+    ctx.restore();
+  }
+}
+
+function renderChips(){
+  chipBox.innerHTML = "";
+  state.names.forEach(function(nm){
+    var chip = document.createElement("span"); chip.className = "chip";
+    var t = document.createElement("span"); t.textContent = nm;
+    var x = document.createElement("button"); x.type = "button"; x.textContent = "×";
+    x.setAttribute("aria-label", "Remove " + nm);
+    x.addEventListener("click", function(){
+      if(spinning) return;
+      state.names = state.names.filter(function(s){ return s !== nm; });
+      save(); renderAll();
+    });
+    chip.appendChild(t); chip.appendChild(x);
+    chipBox.appendChild(chip);
+  });
+  var n = state.names.length;
+  countLabel.textContent = n + (n===1 ? " name" : " names") + " in the drawing";
+}
+
+function renderWinners(){
+  [1,2].forEach(function(k){
+    var el = document.getElementById("spot"+k);
+    var nm = el.querySelector(".nm");
+    var w = state.winners[k-1];
+    nm.textContent = w ? w : "—";
+    el.classList.toggle("filled", !!w);
+  });
+  document.getElementById("bothFilled").style.display = state.winners.length >= 2 ? "block" : "none";
+}
+
+function renderSpinState(){
+  var can = state.names.length > 0 && !spinning && !pendingWinner;
+  spinBtn.disabled = !can;
+  if(spinning){ spinHint.textContent = "Spinning… good luck! 🦋"; hubBtn.setAttribute("disabled",""); }
+  else if(pendingWinner){ spinHint.textContent = "Confirm the winner, or spin again."; hubBtn.setAttribute("disabled",""); }
+  else if(state.names.length === 0){ spinHint.textContent = "Add at least one name to spin."; hubBtn.setAttribute("disabled",""); }
+  else if(state.winners.length >= 2){ spinHint.textContent = "Both spots are filled — spins now are just for fun."; hubBtn.removeAttribute("disabled"); }
+  else{ spinHint.textContent = "Ready — tap SPIN when Glam says go!"; hubBtn.removeAttribute("disabled"); }
+}
+
+function renderAll(){ renderChips(); renderWinners(); renderSpinState(); drawWheel(); }
+
+/* ---------- sound ---------- */
+function tick(){
+  if(!soundChk.checked) return;
+  try{
+    if(!audioCtx){ var AC = window.AudioContext || window.webkitAudioContext; if(!AC) return; audioCtx = new AC(); }
+    if(audioCtx.state === "suspended") audioCtx.resume();
+    var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = "square"; o.frequency.value = 1350;
+    g.gain.setValueAtTime(0.045, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.045);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + 0.05);
+  }catch(e){}
+}
+
+/* ---------- confetti ---------- */
+function burst(){
+  var box = document.getElementById("confetti");
+  box.innerHTML = "";
+  var colors = ["#e00027","#ff5b74","#f6c453","#ffd9a0","#fff1f3","#ff8fa3"];
+  for(var i=0;i<70;i++){
+    var p = document.createElement("i");
+    var sz = 6 + Math.random()*8;
+    p.style.left = (Math.random()*100) + "%";
+    p.style.width = sz + "px"; p.style.height = (sz*0.55) + "px";
+    p.style.background = colors[i % colors.length];
+    p.style.animation = "fall " + (1.4 + Math.random()*1.6) + "s ease-in " + (Math.random()*0.7) + "s forwards";
+    box.appendChild(p);
+  }
+}
+
+/* ---------- spin ---------- */
+function spin(){
+  if(spinning || pendingWinner || state.names.length === 0) return;
+  var n = state.names.length;
+  var seg = 360 / n;
+  var winnerIdx = Math.floor(Math.random() * n);
+  if(window.__wheelForceWinner !== undefined && window.__wheelForceWinner !== null){
+    winnerIdx = ((window.__wheelForceWinner % n) + n) % n;
+  }
+  var jitter = (Math.random() - 0.5) * seg * 0.5; // land inside the segment, not dead-center every time
+  var rel = (winnerIdx + 0.5) * seg + jitter;       // pointer-relative position we want at rest
+  var base = ((-rel) % 360 + 360) % 360;
+  var curMod = ((rotation % 360) + 360) % 360;
+  var delta = ((base - curMod) + 360) % 360 + 360 * (5 + Math.floor(Math.random()*2)); // 5-6 full turns
+  var startRot = rotation;
+  var target = rotation + delta;
+  var dur = (typeof window.__wheelSpinMs === "number" && window.__wheelSpinMs > 0) ? window.__wheelSpinMs : 8000;
+  var t0 = null;
+  spinning = true; lastTickIdx = -1;
+  renderSpinState();
+
+  function frame(ts){
+    if(t0 === null) t0 = ts;
+    var t = Math.min(1, (ts - t0) / dur);
+    var ease = 1 - Math.pow(1 - t, 4); // long ease-out
+    rotation = startRot + (target - startRot) * ease;
+    drawWheel();
+    var idx = Math.floor(((((-rotation) % 360) + 360) % 360) / seg);
+    if(idx !== lastTickIdx){ lastTickIdx = idx; if(t < 0.985) tick(); }
+    if(t < 1){ requestAnimationFrame(frame); }
+    else{
+      rotation = target;
+      spinning = false;
+      drawWheel();
+      pendingWinner = state.names[winnerIdx];
+      showWinner(pendingWinner);
+      renderSpinState();
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+function showWinner(name){
+  var spotNo = Math.min(state.winners.length + 1, 2);
+  winSpotLabel.textContent = state.winners.length >= 2
+    ? "🎉 FUN SPIN WINNER 🎉"
+    : "🎉 SPOT #" + spotNo + " WINNER 🎉";
+  winName.textContent = name;
+  overlay.classList.add("show");
+  burst();
+}
+
+document.getElementById("confirmBtn").addEventListener("click", function(){
+  if(!pendingWinner) return;
+  var name = pendingWinner;
+  pendingWinner = null;
+  overlay.classList.remove("show");
+  if(state.winners.length < 2){
+    state.winners.push(name);
+    state.names = state.names.filter(function(s){ return s !== name; });
+  }
+  save(); renderAll();
+});
+document.getElementById("againBtn").addEventListener("click", function(){
+  pendingWinner = null;
+  overlay.classList.remove("show");
+  renderAll();
+});
+
+/* ---------- name controls ---------- */
+document.getElementById("addBtn").addEventListener("click", function(){
+  var added = 0;
+  parseLines().forEach(function(nm){ if(!hasName(nm)){ state.names.push(nm); added++; } });
+  if(added > 0){ nameInput.value = ""; }
+  save(); renderAll();
+});
+document.getElementById("loadBtn").addEventListener("click", function(){
+  var seen = {}, out = [];
+  parseLines().forEach(function(nm){
+    var low = nm.toLowerCase();
+    if(!seen[low] && state.winners.map(function(w){return w.toLowerCase();}).indexOf(low) === -1){ seen[low] = 1; out.push(nm); }
+  });
+  state.names = out;
+  nameInput.value = "";
+  save(); renderAll();
+});
+document.getElementById("resetBtn").addEventListener("click", function(){
+  if(!window.confirm("Reset the drawing? Winners are cleared and their names go back on the wheel.")) return;
+  state.winners.forEach(function(w){ if(!hasName(w)) state.names.push(w); });
+  state.winners = [];
+  pendingWinner = null;
+  overlay.classList.remove("show");
+  save(); renderAll();
+});
+document.getElementById("clearBtn").addEventListener("click", function(){
+  if(!window.confirm("Clear ALL names and winners? This cannot be undone.")) return;
+  state.names = []; state.winners = []; pendingWinner = null;
+  overlay.classList.remove("show");
+  save(); renderAll();
+});
+spinBtn.addEventListener("click", spin);
+hubBtn.addEventListener("click", spin);
+
+/* ---------- test hooks (harmless in production) ---------- */
+window.__wheel = {
+  state: state,
+  spin: spin,
+  draw: drawWheel,
+  get spinning(){ return spinning; },
+  get pendingWinner(){ return pendingWinner; },
+  confirm: function(){ document.getElementById("confirmBtn").click(); },
+  again: function(){ document.getElementById("againBtn").click(); }
+};
+
+renderAll();
+})();
+</script>
+</body>
+</html>
